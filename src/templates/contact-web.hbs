@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+    <meta charset="utf-8"> <!-- utf-8 works for most cases -->
+    <meta name="viewport" content="width=device-width"> <!-- Forcing initial-scale shouldn't be necessary -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Use the latest (edge) version of IE rendering engine -->
+    <meta name="x-apple-disable-message-reformatting">  <!-- Disable auto-scale in iOS 10 Mail entirely -->
+    <title></title> <!-- The title tag shows in email notifications, like Android 4.4. -->
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+
+<!-- CSS Reset : BEGIN -->
+<style>
+/* What it does: Remove spaces around the email design added by some email clients. */
+/* Beware: It can remove the padding / margin and add a background color to the compose a reply window. */
+html,
+body {
+    margin: 0 auto !important;
+    padding: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    background: #f1f1f1;
+}
+
+/* What it does: Stops email clients resizing small text. */
+* {
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+}
+
+/* What it does: Centers email on Android 4.4 */
+div[style*="margin: 16px 0"] {
+    margin: 0 !important;
+}
+
+/* What it does: Stops Outlook from adding extra spacing to tables. */
+table,
+td {
+    mso-table-lspace: 0pt !important;
+    mso-table-rspace: 0pt !important;
+}
+
+/* What it does: Fixes webkit padding issue. */
+table {
+    border-spacing: 0 !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    margin: 0 auto !important;
+}
+
+/* What it does: Uses a better rendering method when resizing images in IE. */
+img {
+    -ms-interpolation-mode:bicubic;
+}
+
+/* What it does: Prevents Windows 10 Mail from underlining links despite inline CSS. Styles for underlined links should be inline. */
+a {
+    text-decoration: none;
+}
+</style>
+<!-- CSS Reset : END -->
+
+<!-- Progressive Enhancements : BEGIN -->
+<style>
+body {
+	font-family: 'Poppins', sans-serif;
+	font-weight: 400;
+	font-size: 15px;
+	line-height: 1.8;
+	color: #F0E4D6;
+}
+
+.primary {
+	background: #F0E4D6;
+}
+
+.subtitles {
+	font-family: 'Poppins', sans-serif;
+	color: #00738F;
+	margin: 0px;
+	font-size: 20px;
+	font-weight: 400;
+}
+
+p {
+	color: rgba(0,0,0,.8);
+	font-size: 13px;
+}
+
+h1,h2,h3,h4,h5,h6{
+	font-family: 'Poppins', sans-serif;
+	color: #000000;
+	margin-top: 0px;
+	font-weight: 400;
+}
+</style>
+
+
+</head>
+
+<body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly;">
+	<div style="width: 100%; min-width: 280px; max-width: 600px; margin: 0px auto; text-align: center;" class="primary">
+		<center style="width: 100%;"></center>
+    	<!-- BEGIN BODY -->
+      <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+				<tr>
+          <td valign="top">
+          	<img src="cid:header.png" style="max-width: 600px; width: 100%; min-width: 280px;">
+          </td>
+	      </tr>
+				<tr>
+          <td valign="middle">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="text-align: center;">
+							<tr>
+          			<td>
+									<h1 style="color: #F05923; font-weight: bold;">Contacto - Sitio Web</h1>
+			          </td>
+          		</tr>
+
+							<tr>
+								<td>
+                    <h3 class="subtitles">Nombre completo:</h3>
+										<p>{{ name }}, {{ lastname }}</p>
+			          </td>
+          		</tr>
+
+							<tr>
+								<td>
+                    <h3 class="subtitles">Email:</h3>
+										<p>{{ email }}</p>
+			          </td>
+          		</tr>
+
+							
+              <tr>
+            		<td>
+                  <h3 class="subtitles">Teléfono:</h3>
+									<p>
+									{{#if (isdefined phone)}}
+										{{ phone }}
+									{{else}}
+										N/A
+									{{/if}}
+									</p>
+            		</td>
+            	</tr>
+
+							<tr>
+            		<td>
+                  <h3 class="subtitles">Mensaje:</h3>
+                  <p style="border: 1px solid gray; border-radius: 20px 20px; min-height: 200px; min-width: 250px; margin: 0 15px; margin-bottom: 30px; background-color: white;">{{ message }}</p>
+            		</td>
+            	</tr>
+            </table>
+          </td>
+	      </tr>
+				<tr>
+          <td valign="bottom" style="padding: 1em 2.5em 0 2.5em; width: 100%; height: 60px; background-color: #0494A4;">
+						<a href="https://www.instagram.com/lasolas.hotel/">
+          	<img src="cid:instagram.png" style="display: inline-block; min-width: 16px; max-width: 16px; width: 100%;">
+						<h3 style="display: inline-block; color: #FFFFFF;">lasolas.hotel</h3>
+						</a>
+          </td>
+	      </tr>
+      </table>
+  	</center>
+  </div>
+</body>
+</html>
