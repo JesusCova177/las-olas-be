@@ -23,13 +23,15 @@ export class MailService {
   private readonly attachments: MailAttachment[];
 
   // En mail.service.ts
+  // En src/mail/mail.service.ts
   constructor(
     private readonly configService: ConfigService,
     private readonly mailService: MailerService,
   ) {
     this.recipients = this.configService.getOrThrow<MailRecipients>('recipients');
 
-    // Si tus archivos están en src/mail/templates, esta ruta en dist será:
+    // '..' sube de 'mail' a 'src', luego entra a 'templates'
+    // En Railway esto buscará en dist/templates
     this.templatesRoot = join(__dirname, '..', 'templates');
 
     this.attachments = this.loadAttachments();

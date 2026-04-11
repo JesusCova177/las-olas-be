@@ -6,9 +6,9 @@
     "deleteOutDir": true,
     "assets": [
       {
-        "include": "mail/templates/**/*",
+        "include": "templates/**/*",
         "watch": true,
-        "outDir": "dist/mail/templates"
+        "outDir": "dist/templates"
       }
     ],
     "watchAssets": true
