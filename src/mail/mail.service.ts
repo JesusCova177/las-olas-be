@@ -128,8 +128,12 @@ export class MailService {
         this.logger.error(`EL TEMPLATE NO EXISTE: ${templatePath}`);
       }
 
+      const formattedTo = typeof options.to === 'string'
+        ? options.to.split(',').map(e => e.trim())
+        : options.to;
+
       await this.mailService.sendMail({
-        to: options.to,
+        to: formattedTo,
         from: this.configService.get('MAILER_DEFAULT_FROM') || 'onboarding@resend.dev',
         subject: options.subject,
         template: options.template,
