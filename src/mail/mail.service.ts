@@ -1,9 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { MailRecipients } from './interfaces/mail-recipients.interface';
+import { MailRecipients } from '../common/interfaces';
+import { EmailType } from '../common/enums';
+import { MailDto } from '../common/dto/mail.dto';
+import { ReserveMailDto } from './dto/reserve-mail.dto';
+import {
+  CONTACT_NAME,
+  SUGGESTION_NAME,
+  CONTACT_WEB_NAME,
+  NEW_RESERVATION_NAME,
+} from '../common/constants';
 
 @Injectable()
 export class MailService {
@@ -64,8 +73,50 @@ export class MailService {
       .filter(Boolean);
   }
 
+  async sendContactMail(dto: MailDto): Promise<void> {
+    this.logger.log(`starting service para ${dto.type}...`);
+    if (dto.type === EmailType.Suggestion) {
+      await this.sendMail({
+        subject: SUGGESTION_NAME,
+        to: this.recipients.suggestion,
+        template: dto.type,
+        context: dto,
+      });
+    } else if (dto.type === EmailType.Contact) {
+      await this.sendMail({
+        subject: CONTACT_NAME,
+        to: this.recipients.contact,
+        template: dto.type,
+        context: dto,
+      });
+    } else if (dto.type === EmailType.ContactWeb) {
+      await this.sendMail({
+        subject: CONTACT_WEB_NAME,
+        to: this.recipients.contact_web,
+        template: dto.type,
+        context: dto,
+      });
+    } else if (dto.type === EmailType.NewReservation) {
+      const reserveDto = dto as ReserveMailDto;
+      const recipients = this.configService.getOrThrow<string>(
+        'MAIL_RECIPIENT_NEW_RESERVATION',
+      );
+      const recipientList = recipients.split(',').map((email) => email.trim());
+      this.logger.log(`Recipient List para reserva: ${recipientList.join(', ')}`);
+
+      await this.sendMail({
+        subject: NEW_RESERVATION_NAME,
+        to: recipientList,
+        template: dto.type,
+        context: reserveDto,
+      });
+    } else {
+      throw new BadRequestException('Unexpected Email Type: ' + dto.type);
+    }
+  }
+
   async sendMail(options: {
-    to: string;
+    to: string | string[];
     subject: string;
     template: string;
     context: any;
