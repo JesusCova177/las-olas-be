@@ -22,17 +22,21 @@ export class MailService {
   private readonly recipients: MailRecipients;
   private readonly attachments: MailAttachment[];
 
+  // En mail.service.ts
   constructor(
     private readonly configService: ConfigService,
     private readonly mailService: MailerService,
   ) {
     this.recipients = this.configService.getOrThrow<MailRecipients>('recipients');
+
+    // Si tus archivos están en src/mail/templates, esta ruta en dist será:
     this.templatesRoot = join(__dirname, '..', 'templates');
+
     this.attachments = this.loadAttachments();
   }
 
   async sendContactMail(dto: MailDto): Promise<void> {
-    console.log("starting service...", dto);
+    console.log('starting service...', dto);
     if (dto.type === EmailType.Suggestion) {
       await this.sendMail(SUGGESTION_NAME, this.recipients.suggestion, dto);
     } else if (dto.type === EmailType.Contact) {
@@ -49,17 +53,15 @@ export class MailService {
       //   await this.sendMail(NEW_RESERVATION_NAME, this.recipients.new_reservation, rest);
       //   return;
       // }
-      const recipients = this.configService.getOrThrow<string>('MAIL_RECIPIENTS_NEW_RESERVATION');
-      const recipientList = recipients.split(',').map(email => email.trim());
+      const recipients = this.configService.getOrThrow<string>(
+        'MAIL_RECIPIENTS_NEW_RESERVATION',
+      );
+      const recipientList = recipients.split(',').map((email) => email.trim());
 
       console.log('Recipient List:', recipientList); // Asegurándote de que la lista esté correctamente formada
 
       // Enviar a todos los destinatarios
-      await this.sendMail(
-        NEW_RESERVATION_NAME,
-        recipientList,
-        reserveDto,
-      );
+      await this.sendMail(NEW_RESERVATION_NAME, recipientList, reserveDto);
     } else {
       throw new BadRequestException('Unexpected Email Type: ' + dto.type);
     }
