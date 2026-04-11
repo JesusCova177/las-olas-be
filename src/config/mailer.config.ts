@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerOptions, MailerOptionsFactory } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { ResendTransport } from '@documenso/nodemailer-resend';
 
 import * as moment from 'moment';
 import { isString } from 'class-validator';
@@ -15,19 +16,9 @@ export class MailerConfigService implements MailerOptionsFactory {
     const username = this.configService.getOrThrow<string>('mailer_user');
     const defaultFrom = this.configService.getOrThrow<string>('mailer_default_from');
     return {
-      transport: {
-        host: this.configService.getOrThrow<string>('mailer_host'),
-        port: +this.configService.getOrThrow<number>('mailer_port'),
-        ignoreTLS: this.configService.getOrThrow<string>('mailer_ignore_tls') === 'true',
-        secure: this.configService.getOrThrow<string>('mailer_secure') === 'true',
-        tls: {
-          rejectUnauthorized: false,
-        },
-        auth: {
-          user: this.configService.getOrThrow<string>('mailer_user'),
-          pass: this.configService.getOrThrow<string>('mailer_pwd'),
-        },
-      },
+      transport: ResendTransport.makeTransport({
+        apiKey: this.configService.getOrThrow<string>('mailer_pwd'),
+      }),
       // preview: configService.get<string>('enviroment') === 'dev',
       defaults: {
         from: `"${defaultFrom}" <${username}>`,

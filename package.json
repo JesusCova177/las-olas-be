@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@documenso/nodemailer-resend": "^4.0.0",
     "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",
@@ -40,6 +41,7 @@
     "pino-pretty": "^10.0.0",
     "reflect-metadata": "^0.1.13",
     "request-ip": "^3.3.0",
+    "resend": "^6.10.0",
     "rxjs": "^7.2.0",
     "xss-clean": "^0.1.1"
   },
