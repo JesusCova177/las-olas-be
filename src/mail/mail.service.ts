@@ -1,102 +1,85 @@
-import { basename, join } from 'path';
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
-
-import {
-  CONTACT_NAME,
-  SUGGESTION_NAME,
-  CONTACT_WEB_NAME,
-  NEW_RESERVATION_NAME, // NEW_CLIENT_NAME,
-} from 'src/common/constants';
-import { MailAttachment, MailRecipients } from 'src/common/interfaces';
-import { recursiveDirFiles } from 'src/common/helpers';
-import { EmailType } from 'src/common/enums';
-
-import { MailDto } from 'src/common/dto/mail.dto';
-import { ReserveMailDto } from './dto/reserve-mail.dto';
+import { join } from 'path';
+import { existsSync } from 'fs';
+import { MailRecipients } from './interfaces/mail-recipients.interface'; // Ajusta la ruta si es necesario
 
 @Injectable()
 export class MailService {
-  private readonly templatesRoot: string;
   private readonly recipients: MailRecipients;
-  private readonly attachments: MailAttachment[];
+  private readonly templatesRoot: string;
+  private readonly attachments: any[];
 
-  // En mail.service.ts
-  // En src/mail/mail.service.ts
   constructor(
     private readonly configService: ConfigService,
     private readonly mailService: MailerService,
   ) {
+    // 1. Cargamos destinatarios
     this.recipients = this.configService.getOrThrow<MailRecipients>('recipients');
 
-    // Esta ruta busca en la carpeta raíz del proyecto desplegado
-    this.templatesRoot = join(process.cwd(), 'dist', 'templates');
+    // 2. BUSCADOR DE RUTAS (Solución para Railway)
+    // Probamos las 3 rutas posibles donde NestJS podría haber puesto los .hbs
+    const pathsToTry = [
+      join(process.cwd(), 'dist', 'templates'),
+      join(process.cwd(), 'dist', 'src', 'templates'),
+      join(__dirname, '..', 'templates'),
+    ];
 
-    try {
-      this.attachments = this.loadAttachments();
-    } catch (error) {
-      // Si las imágenes no existen, el servidor no morirá
-      console.error('Error cargando adjuntos:', error);
-      this.attachments = [];
-    }
-  }
+    this.templatesRoot = pathsToTry.find((p) => existsSync(p)) || pathsToTry[0];
 
-  async sendContactMail(dto: MailDto): Promise<void> {
-    console.log('starting service...', dto);
-    if (dto.type === EmailType.Suggestion) {
-      await this.sendMail(SUGGESTION_NAME, this.recipients.suggestion, dto);
-    } else if (dto.type === EmailType.Contact) {
-      await this.sendMail(CONTACT_NAME, this.recipients.contact, dto);
-    } /* else if (dto.type === EmailType.NewClient) {
-      await this.sendMail(NEW_CLIENT_NAME, this.recipients.new_client, dto);
-    }*/ else if (dto.type === EmailType.ContactWeb) {
-      await this.sendMail(CONTACT_WEB_NAME, this.recipients.contact_web, dto);
-    } else if (dto.type === EmailType.NewReservation) {
-      const reserveDto = dto as ReserveMailDto;
-      // TODO: Better solution to remove extra properties from dto
-      // if (reserveDto.entityType === EntityType.Turist) {
-      //   const { jobTitle, companyName, ...rest } = reserveDto;
-      //   await this.sendMail(NEW_RESERVATION_NAME, this.recipients.new_reservation, rest);
-      //   return;
-      // }
-      const recipients = this.configService.getOrThrow<string>(
-        'MAIL_RECIPIENTS_NEW_RESERVATION',
-      );
-      const recipientList = recipients.split(',').map((email) => email.trim());
+    // Log para que veas en Railway dónde encontró los archivos
+    console.log('--- MAIL SERVICE CONFIG ---');
+    console.log('Templates Path:', this.templatesRoot);
 
-      console.log('Recipient List:', recipientList); // Asegurándote de que la lista esté correctamente formada
-
-      // Enviar a todos los destinatarios
-      await this.sendMail(NEW_RESERVATION_NAME, recipientList, reserveDto);
-    } else {
-      throw new BadRequestException('Unexpected Email Type: ' + dto.type);
-    }
-  }
-
-  private async sendMail(subject: string, to: string | string[], dto: MailDto) {
-    console.log('Sending email to:', to);
-    await this.mailService.sendMail({
-      to,
-      subject,
-      template: dto.type,
-      context: { ...dto },
-      attachments: this.attachments,
-    });
+    // 3. CARGA SEGURA DE ADJUNTOS
+    this.attachments = this.loadAttachments();
   }
 
   private loadAttachments() {
-    return recursiveDirFiles(
-      join(this.templatesRoot, 'images'),
-      /^.(png|jpg|jpeg|svg)/,
-    ).map((path: string): MailAttachment => {
-      const filename = basename(path);
-      return {
-        filename,
-        path,
-        cid: filename.replace(' ', '-'),
-        contentDisposition: 'inline',
-      };
-    });
+    // Definimos las imágenes que tus .hbs necesitan (cid:logo y cid:instagram)
+    const images = [
+      { filename: 'logo.png', cid: 'logo' },
+      { filename: 'instagram.png', cid: 'instagram' },
+    ];
+
+    return images
+      .map((img) => {
+        const fullPath = join(this.templatesRoot, img.filename);
+        if (existsSync(fullPath)) {
+          return {
+            filename: img.filename,
+            path: fullPath,
+            cid: img.cid,
+          };
+        }
+        console.warn(`Imagen no encontrada: ${img.filename} en ${this.templatesRoot}`);
+        return null;
+      })
+      .filter(Boolean); // Solo deja los que sí existen
   }
+
+  async sendMail(options: {
+    to: string;
+    subject: string;
+    template: string;
+    context: any;
+  }) {
+    try {
+      await this.mailService.sendMail({
+        to: options.to,
+        from: this.configService.get('MAILER_DEFAULT_FROM') || 'onboarding@resend.dev',
+        subject: options.subject,
+        template: options.template, // Ejemplo: 'contact'
+        context: options.context,
+        attachments: this.attachments,
+      });
+      return { success: true };
+    } catch (error) {
+      console.error('Error enviando correo:', error);
+      throw error;
+    }
+  }
+
+  // Si tienes otros métodos como sendContact, asegúrate de que usen sendMail de arriba
 }
