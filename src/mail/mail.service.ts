@@ -30,11 +30,16 @@ export class MailService {
   ) {
     this.recipients = this.configService.getOrThrow<MailRecipients>('recipients');
 
-    // '..' sube de 'mail' a 'src', luego entra a 'templates'
-    // En Railway esto buscará en dist/templates
-    this.templatesRoot = join(__dirname, '..', 'templates');
+    // Esta ruta busca en la carpeta raíz del proyecto desplegado
+    this.templatesRoot = join(process.cwd(), 'dist', 'templates');
 
-    this.attachments = this.loadAttachments();
+    try {
+      this.attachments = this.loadAttachments();
+    } catch (error) {
+      // Si las imágenes no existen, el servidor no morirá
+      console.error('Error cargando adjuntos:', error);
+      this.attachments = [];
+    }
   }
 
   async sendContactMail(dto: MailDto): Promise<void> {
